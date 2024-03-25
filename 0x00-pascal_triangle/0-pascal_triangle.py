@@ -5,6 +5,10 @@ Pascal triangle algorithm
 
 
 def pascal_triangle(n):
+    """
+    Function to create pascals triangle
+    depending on the number n
+    """
     if (n <= 0):
         return []
     else:
