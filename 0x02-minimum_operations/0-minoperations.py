@@ -4,18 +4,9 @@
 
 def minOperations(n):
     """ Returns the number of min operations
-        for the copy and paste commands"""
+        needed for the copy and paste ops"""
     if n < 2:
         return 0
-
-    factors = []
-    divisor = 2
-    b = n
-
-    while b > 1:
-        while b % divisor == 0:
-            factors.append(divisor)
-            b //= divisor
-        divisor += 1
-
-    return max(factors) + (n // max(factors))
+    for i in range(2, n+1):
+        if n % i == 0:
+            return minOperations(int(n/i)) + i
