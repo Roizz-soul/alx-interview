@@ -1,20 +1,51 @@
 #!/usr/bin/node
-const util = require('util');
-const request = util.promisify(require('request'));
-const filmID = process.argv[2];
+const request = require('request');
 
-async function starwarsCharacters (filmId) {
-  const endpoint = 'https://swapi-api.hbtn.io/api/films/' + filmId;
-  let response = await (await request(endpoint)).body;
-  response = JSON.parse(response);
-  const characters = response.characters;
+// Function to get movie details and print characters
+function getStarWarsCharacters(movieId) {
+  const apiUrl = `https://swapi.dev/api/films/${movieId}/`;
 
-  for (let i = 0; i < characters.length; i++) {
-    const urlCharacter = characters[i];
-    let character = await (await request(urlCharacter)).body;
-    character = JSON.parse(character);
-    console.log(character.name);
-  }
+  // Make request to SWAPI for the movie details
+  request(apiUrl, (error, response, body) => {
+    if (error) {
+      console.error('Error fetching data:', error);
+      return;
+    }
+
+    if (response.statusCode !== 200) {
+      console.log(`Failed to retrieve movie. Status code: ${response.statusCode}`);
+      return;
+    }
+
+    const movieData = JSON.parse(body);
+
+    // Retrieve characters list and print names
+    const characters = movieData.characters;
+
+    characters.forEach((characterUrl) => {
+      request(characterUrl, (error, response, body) => {
+        if (error) {
+          console.error('Error fetching character:', error);
+          return;
+        }
+
+        if (response.statusCode === 200) {
+          const characterData = JSON.parse(body);
+          console.log(characterData.name);
+        } else {
+          console.log(`Failed to retrieve character. Status code: ${response.statusCode}`);
+        }
+      });
+    });
+  });
 }
 
-starwarsCharacters(filmID);
+// Check for movie ID argument
+const movieId = process.argv[2];
+if (!movieId) {
+  console.log('Please provide a movie ID as a positional argument.');
+  process.exit(1);
+}
+
+// Call the function to get characters for the provided movie ID
+getStarWarsCharacters(movieId);
