@@ -3,53 +3,67 @@
 Prime Game
 """
 
-def isWinner(x: int, nums: list) -> str:
-    def sieve_of_eratosthenes(n):
-        """ Returns a list of prime numbers up to n using Sieve of Eratosthenes """
-        is_prime = [True] * (n + 1)
-        p = 2
-        primes = []
-        while p * p <= n:
-            if is_prime[p]:
-                for i in range(p * p, n + 1, p):
-                    is_prime[i] = False
-            p += 1
-        for p in range(2, n + 1):
-            if is_prime[p]:
-                primes.append(p)
-        return primes
 
-    def play_game(n):
-        """ Simulate the game for a single round with n numbers """
-        primes = sieve_of_eratosthenes(n)
-        turn = 0  # 0 for Maria, 1 for Ben
-        remaining_numbers = set(range(1, n + 1))
+def findMultiples(num, targets):
+    """
+    Finds multiples of a given number within a list
+    """
+    for i in targets:
+        if i % num == 0:
+            targets.remove(i)
+    return targets
 
-        while primes:
-            prime = primes.pop(0)
-            if prime not in remaining_numbers:
-                continue
-            # Remove prime and its multiples
-            for multiple in range(prime, n + 1, prime):
-                remaining_numbers.discard(multiple)
-            turn = 1 - turn  # Switch turns
 
-        # If turn is 0, Maria lost (Ben made the last move)
-        return "Ben" if turn == 0 else "Maria"
+def isPrime(i):
+    """
+    Check if a number is prime.
+    """
+    if i == 1:
+        return False
+    for j in range(2, i):
+        if i % j == 0:
+            return False
+    return True
 
-    maria_wins = 0
-    ben_wins = 0
 
-    for n in nums:
-        winner = play_game(n)
-        if winner == "Maria":
-            maria_wins += 1
+def findPrimes(n):
+    """
+    Dispatch a given set into prime numbers and non-prime numbers.
+    """
+    counter = 0
+    target = list(n)
+    for i in range(1, len(target) + 1):
+        if isPrime(i):
+            counter += 1
+            target.remove(i)
+            target = findMultiples(i, target)
         else:
-            ben_wins += 1
+            pass
+    return counter
 
-    if maria_wins > ben_wins:
-        return "Maria"
-    elif ben_wins > maria_wins:
-        return "Ben"
+
+def isWinner(x, nums):
+    """ isWinner function
+    """
+    players = {'Maria': 0, 'Ben': 0}
+    cluster = set()
+    for elem in range(x):
+        nums.sort()
+        num = nums[elem]
+        for i in range(1, num + 1):
+            cluster.add(i)
+            if i == num + 1:
+                break
+        temp = findPrimes(cluster)
+
+        if temp % 2 == 0:
+            players['Ben'] += 1
+        elif temp % 2 != 0:
+            players['Maria'] += 1
+
+    if players['Maria'] > players['Ben']:
+        return 'Maria'
+    elif players['Maria'] < players['Ben']:
+        return 'Ben'
     else:
         return None
